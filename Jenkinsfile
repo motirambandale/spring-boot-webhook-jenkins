@@ -2,13 +2,16 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17'
         maven 'Maven3'
+    }
+
+    environment {
+        SONARQUBE_ENV = 'SonarQubeServer'
     }
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 git 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
             }
@@ -16,7 +19,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean compile'
             }
         }
 
@@ -26,9 +29,41 @@ pipeline {
             }
         }
 
-        stage('Run') {
+        stage('SonarQube Analysis') {
             steps {
-                sh 'java -jar target/*.jar &'
+                withSonarQubeEnv('SonarQubeServer') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+
+        stage('Upload to Nexus') {
+            steps {
+                script {
+                    nexusArtifactUploader(
+                        nexusVersion: 'nexus3',
+                        protocol: 'http',
+                        nexusUrl: 'http://localhost:8081',
+                        groupId: 'com.example',
+                        version: '1.0',
+                        repository: 'maven-releases',
+                        credentialsId: 'nexus3 credentials',
+                        artifacts: [
+                            [
+                                artifactId: 'spring-boot-webhook-jenkins',
+                                classifier: '',
+                                file: 'target/spring-boot-webhook-jenkins.jar',
+                                type: 'jar'
+                            ]
+                        ]
+                    )
+                }
             }
         }
     }
