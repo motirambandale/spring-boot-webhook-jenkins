@@ -5,10 +5,6 @@ pipeline {
         maven 'Maven3'
     }
 
-    environment {
-        SONARQUBE_ENV = 'SonarQubeServer'
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -37,6 +33,12 @@ pipeline {
             }
         }
 
+        stage('Quality Gate') {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+
         stage('Package') {
             steps {
                 sh 'mvn package'
@@ -45,25 +47,23 @@ pipeline {
 
         stage('Upload to Nexus') {
             steps {
-                script {
-                    nexusArtifactUploader(
-                        nexusVersion: 'nexus3',
-                        protocol: 'http',
-                        nexusUrl: 'http://localhost:8081',
-                        groupId: 'com.example',
-                        version: '1.0',
-                        repository: 'maven-releases',
-                        credentialsId: 'nexus3 credentials',
-                        artifacts: [
-                            [
-                                artifactId: 'spring-boot-webhook-jenkins',
-                                classifier: '',
-                                file: 'target/spring-boot-webhook-jenkins.jar',
-                                type: 'jar'
-                            ]
+                nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: 'localhost:8081',
+                    groupId: 'com.example',
+                    version: '1.0',
+                    repository: 'maven-releases',
+                    credentialsId: 'nexus3-credentials',
+                    artifacts: [
+                        [
+                            artifactId: 'spring-boot-webhook-jenkins',
+                            classifier: '',
+                            file: 'target/*.jar',
+                            type: 'jar'
                         ]
-                    )
-                }
+                    ]
+                )
             }
         }
     }
