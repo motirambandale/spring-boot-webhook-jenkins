@@ -28,16 +28,18 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
-                    sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000'
+                    sh 'mvn clean verify sonar:sonar'
                 }
             }
         }
 
-        stage('Quality Gate') {
-            steps {
-                waitForQualityGate abortPipeline: true
-            }
-        }
+       stage('Quality Gate') {
+          steps {
+            timeout(time: 2, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+           }
+         }
+       }
 
         stage('Package') {
             steps {
@@ -53,6 +55,5 @@ pipeline {
                 '''
             }
         }
-
     }
 }
