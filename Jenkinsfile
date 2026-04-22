@@ -1,23 +1,19 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.9-eclipse-temurin-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
-    
+    agent any
 
     environment {
         IMAGE_NAME = "spring-boot-webhook-jenkins"
     }
 
-   stage('Checkout Code') {
-    steps {
-        cleanWs()
-        git branch: 'master',
-            url: 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
-    }
-}
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                deleteDir()
+                git branch: 'master',
+                    url: 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
+            }
+        }
 
         stage('Build') {
             steps {
@@ -62,8 +58,8 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh '''
-                docker rm -f $IMAGE_NAME || true
-                docker run -d -p 8085:8085 --name $IMAGE_NAME $IMAGE_NAME:latest
+                    docker rm -f $IMAGE_NAME || true
+                    docker run -d -p 8085:8085 --name $IMAGE_NAME $IMAGE_NAME:latest
                 '''
             }
         }
