@@ -44,27 +44,15 @@ pipeline {
                 sh 'mvn package'
             }
         }
-
-        stage('Upload to Nexus') {
+        
+            stage('Deploy') {
             steps {
-                nexusArtifactUploader(
-                    nexusVersion: 'nexus3',
-                    protocol: 'http',
-                    nexusUrl: 'localhost:8081',
-                    groupId: 'com.example',
-                    version: '1.0',
-                    repository: 'maven-releases',
-                    credentialsId: 'nexus3-credentials',
-                    artifacts: [
-                        [
-                            artifactId: 'spring-boot-webhook-jenkins',
-                            classifier: '',
-                            file: 'target/*.jar',
-                            type: 'jar'
-                        ]
-                    ]
-                )
+                sh '''
+                docker build -t spring-boot-webhook-jenkins:latest .
+                docker run -d --name spring-boot-webhook-jenkins -p 8085:8085 spring-boot-webhook-jenkins:latest
+                '''
             }
         }
+
     }
 }
