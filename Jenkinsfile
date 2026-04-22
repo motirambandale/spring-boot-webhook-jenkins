@@ -1,8 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9.9-eclipse-temurin-17'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
-    tools {
-        maven 'Maven3'
+    environment {
+        IMAGE_NAME = "spring-boot-webhook-jenkins"
     }
 
     stages {
@@ -28,30 +33,36 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
-                    sh 'mvn clean verify sonar:sonar'
+                    sh 'mvn verify sonar:sonar'
                 }
             }
         }
 
-       stage('Quality Gate') {
-          steps {
-            timeout(time: 2, unit: 'MINUTES') {
-              waitForQualityGate abortPipeline: true
-           }
-         }
-       }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
 
         stage('Package') {
             steps {
                 sh 'mvn package -DskipTests'
             }
         }
-        
-            stage('Deploy') {
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:latest .'
+            }
+        }
+
+        stage('Run Container') {
             steps {
                 sh '''
-                docker build -t spring-boot-webhook-jenkins:latest .
-                docker run -d --name spring-boot-webhook-jenkins -p 8085:8085 spring-boot-webhook-jenkins:latest
+                docker rm -f $IMAGE_NAME || true
+                docker run -d -p 8085:8085 --name $IMAGE_NAME $IMAGE_NAME:latest
                 '''
             }
         }
