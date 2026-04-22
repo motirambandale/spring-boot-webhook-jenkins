@@ -11,13 +11,13 @@ pipeline {
         IMAGE_NAME = "spring-boot-webhook-jenkins"
     }
 
-    stages {
-
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
-            }
-        }
+   stage('Checkout Code') {
+    steps {
+        cleanWs()
+        git branch: 'master',
+            url: 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
+    }
+}
 
         stage('Build') {
             steps {
