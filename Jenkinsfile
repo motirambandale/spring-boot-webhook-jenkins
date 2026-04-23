@@ -77,15 +77,15 @@ pipeline {
     }
    }
    
-   stage('Push Image to Nexus') {
+stage('Push Image to Nexus') {
     steps {
         sh '''
-        docker login nexus:8081 -u admin -p MotiJava@0208
-        docker tag spring-boot-webhook-jenkins:1.0.0 nexus:8081/repository/docker-repo/spring-boot-webhook-jenkins:1.0.0
-        docker push nexus:8081/repository/docker-repo/spring-boot-webhook-jenkins:1.0.0
+            docker login host.docker.internal:8082 -u admin -p MotiJava@0208
+            docker tag $IMAGE_NAME:$IMAGE_VERSION host.docker.internal:8082/$IMAGE_NAME:$IMAGE_VERSION
+            docker push host.docker.internal:8082/$IMAGE_NAME:$IMAGE_VERSION
         '''
     }
-  }
+}
   
   stage('Deploy to Kubernetes') {
     steps {
