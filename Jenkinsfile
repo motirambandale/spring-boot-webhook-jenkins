@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-  options {
-        skipDefaultCheckout(true)   // 👈 ADD THIS
+    options {
+        skipDefaultCheckout(true)
     }
-    
+
     tools {
         maven 'M3'
         jdk 'JDK17'
@@ -14,7 +14,8 @@ pipeline {
         IMAGE_NAME = "spring-boot-webhook-jenkins"
     }
 
-       stages {
+    stages {
+
         stage('Clean Workspace') {
             steps {
                 deleteDir()
@@ -60,4 +61,5 @@ pipeline {
                 sh 'mvn package -DskipTests'
             }
         }
+    }
 }
