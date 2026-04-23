@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: spring-boot-webhook-jenkins-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: spring-boot-webhook-jenkins-app
@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: spring-boot-app
-          image: nexus:8081/repository/docker-repo/spring-boot-webhook-jenkins:1.0.0
+          image: host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
           ports:
-            - containerPort: 8080
+            - containerPort: 8085
