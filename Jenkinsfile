@@ -62,5 +62,41 @@ pipeline {
                 sh 'mvn package -DskipTests'
             }
         }
+        
+      stage('Build Docker Image') {
+         steps {
+              sh 'docker build -t spring-boot-webhook-jenkins:latest .'
+         }    
+     }
+     
+     stage('Tag Image') {
+    steps {
+        sh '''
+        docker tag spring-boot-webhook-jenkins:latest spring-boot-webhook-jenkins:1.0.0
+        '''
+    }
+   }
+   
+   stage('Push Image to Nexus') {
+    steps {
+        sh '''
+        docker login nexus:8081 -u admin -p MotiJava@0208
+        docker tag spring-boot-webhook-jenkins:1.0.0 nexus:8081/repository/docker-repo/spring-boot-webhook-jenkins:1.0.0
+        docker push nexus:8081/repository/docker-repo/spring-boot-webhook-jenkins:1.0.0
+        '''
+    }
+  }
+  
+  stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+        kubectl apply -f k8s-deployment.yaml
+        kubectl apply -f k8s-service.yaml
+        '''
+    }
+}
+  
+  
+     
     }
 }
