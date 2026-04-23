@@ -1,5 +1,11 @@
 pipeline {
-    agent any
+    
+       agent {
+        docker {
+            image 'docker:26-dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
   options {
         skipDefaultCheckout(true)   // 👈 ADD THIS
@@ -63,6 +69,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
+				sh 'docker version'
                 sh 'docker build -t $IMAGE_NAME:latest .'
             }
         }
