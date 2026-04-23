@@ -10,10 +10,7 @@ pipeline {
         jdk 'JDK17'
     }
 
-    environment {
-    IMAGE_NAME = "spring-boot-webhook-jenkins"
-    VERSION = "1.0.0"
-}
+ 
 
     stages {
 
@@ -81,9 +78,10 @@ pipeline {
 stage('Push Image to Nexus') {
     steps {
         sh '''
-            echo "MotiJava@0208" | docker login host.docker.internal:8082 -u admin --password-stdin
-            docker tag $IMAGE_NAME:$IMAGE_VERSION host.docker.internal:8082/$IMAGE_NAME:$IMAGE_VERSION
-            docker push host.docker.internal:8082/$IMAGE_NAME:$IMAGE_VERSION
+        echo "MotiJava@0208" | docker login host.docker.internal:8082 -u admin --password-stdin
+
+        docker tag spring-boot-webhook-jenkins:1.0.0 host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
+        docker push host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
         '''
     }
 }
