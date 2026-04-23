@@ -80,7 +80,7 @@ pipeline {
 stage('Push Image to Nexus') {
     steps {
         sh '''
-            docker login host.docker.internal:8082 -u admin -p MotiJava@0208
+            echo "MotiJava@0208" | docker login host.docker.internal:8082 -u admin --password-stdin
             docker tag $IMAGE_NAME:$IMAGE_VERSION host.docker.internal:8082/$IMAGE_NAME:$IMAGE_VERSION
             docker push host.docker.internal:8082/$IMAGE_NAME:$IMAGE_VERSION
         '''
