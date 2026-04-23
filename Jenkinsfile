@@ -5,12 +5,14 @@ pipeline {
         skipDefaultCheckout(true)
     }
 
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
+    }
+
     tools {
         maven 'M3'
         jdk 'JDK17'
     }
-
- 
 
     stages {
 
@@ -54,49 +56,45 @@ pipeline {
             }
         }
 
-
         stage('Package') {
             steps {
                 sh 'mvn package -DskipTests'
             }
         }
-        
-      stage('Build Docker Image') {
-         steps {
-              sh 'docker build -t spring-boot-webhook-jenkins:latest .'
-         }    
-     }
-     
-     stage('Tag Image') {
-    steps {
-        sh '''
-        docker tag spring-boot-webhook-jenkins:latest spring-boot-webhook-jenkins:1.0.0
-        '''
-    }
-   }
-   
-stage('Push Image to Nexus') {
-    steps {
-        sh '''
-        echo "MotiJava@0208" | docker login host.docker.internal:8082 -u admin --password-stdin
 
-        docker tag spring-boot-webhook-jenkins:1.0.0 host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
-        docker push host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
-        '''
-    }
-}
-  
-stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-        export KUBECONFIG=/root/.kube/config
-        kubectl apply -f k8s-deployment.yaml --validate=false
-        kubectl apply -f k8s-service.yaml --validate=false
-        '''
-    }
-}
-  
-  
-     
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t spring-boot-webhook-jenkins:latest .'
+            }
+        }
+
+        stage('Tag Image') {
+            steps {
+                sh '''
+                docker tag spring-boot-webhook-jenkins:latest spring-boot-webhook-jenkins:1.0.0
+                '''
+            }
+        }
+
+        stage('Push Image to Nexus') {
+            steps {
+                sh '''
+                echo "MotiJava@0208" | docker login host.docker.internal:8082 -u admin --password-stdin
+
+                docker tag spring-boot-webhook-jenkins:1.0.0 host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
+                docker push host.docker.internal:8082/spring-boot-webhook-jenkins:1.0.0
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                export KUBECONFIG=/var/jenkins_home/.kube/config
+                kubectl apply -f k8s-deployment.yaml --validate=false
+                kubectl apply -f k8s-service.yaml --validate=false
+                '''
+            }
+        }
     }
 }
