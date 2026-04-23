@@ -1,15 +1,25 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'M3'
+        jdk 'JDK17'
+    }
+
     environment {
         IMAGE_NAME = "spring-boot-webhook-jenkins"
     }
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Clean Workspace') {
             steps {
                 deleteDir()
+            }
+        }
+
+        stage('Checkout') {
+            steps {
                 git branch: 'master',
                     url: 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
             }
@@ -26,6 +36,9 @@ pipeline {
                 sh 'mvn test'
             }
         }
+        
+        
+        
 
         stage('SonarQube Analysis') {
             steps {
@@ -55,7 +68,7 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+        stage('Deploy Container') {
             steps {
                 sh '''
                     docker rm -f $IMAGE_NAME || true
