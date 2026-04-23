@@ -1,11 +1,5 @@
 pipeline {
-    
-       agent {
-        docker {
-            image 'docker:26-dind'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
   options {
         skipDefaultCheckout(true)   // 👈 ADD THIS
@@ -66,21 +60,4 @@ pipeline {
                 sh 'mvn package -DskipTests'
             }
         }
-
-        stage('Build Docker Image') {
-            steps {
-				sh 'docker version'
-                sh 'docker build -t $IMAGE_NAME:latest .'
-            }
-        }
-
-        stage('Deploy Container') {
-            steps {
-                sh '''
-                    docker rm -f $IMAGE_NAME || true
-                    docker run -d -p 8085:8085 --name $IMAGE_NAME $IMAGE_NAME:latest
-                '''
-            }
-        }
-    }
 }
