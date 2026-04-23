@@ -87,21 +87,38 @@ pipeline {
             }
         }
         
-        stage('Test Kube Access') {
+        
+        stage('Debug Kubeconfig') {
     steps {
-        sh 'kubectl cluster-info'
-        sh 'kubectl get nodes'
+        sh '''
+        echo "KUBECONFIG=$KUBECONFIG"
+        ls -l /var/jenkins_home/.kube/
+        cat /var/jenkins_home/.kube/config
+        '''
+    }
+}
+        
+stage('Test Kube Access') {
+    steps {
+        sh '''
+        export KUBECONFIG=/var/jenkins_home/.kube/config
+        kubectl config view
+        kubectl cluster-info
+        kubectl get nodes
+        '''
     }
 }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                export KUBECONFIG=/var/jenkins_home/.kube/config
-                kubectl apply -f k8s-deployment.yaml --validate=false
-                kubectl apply -f k8s-service.yaml --validate=false
-                '''
-            }
-        }
+stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+        export KUBECONFIG=/var/jenkins_home/.kube/config
+        kubectl apply -f k8s-deployment.yaml --validate=false
+        kubectl apply -f k8s-service.yaml --validate=false
+        '''
+    }
+}
+   
+   
     }
 }
