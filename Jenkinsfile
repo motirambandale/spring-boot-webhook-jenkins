@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+  options {
+        skipDefaultCheckout(true)   // 👈 ADD THIS
+    }
+    
     tools {
         maven 'M3'
         jdk 'JDK17'
@@ -10,12 +14,18 @@ pipeline {
         IMAGE_NAME = "spring-boot-webhook-jenkins"
     }
 
-    stages {
-      stage('Checkout') {
-        steps {
-           checkout scm
-          }
-       }
+       stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
         stage('Build') {
             steps {
