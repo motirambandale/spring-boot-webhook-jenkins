@@ -86,11 +86,12 @@ stage('Push Image to Nexus') {
     }
 }
   
-  stage('Deploy to Kubernetes') {
+stage('Deploy to Kubernetes') {
     steps {
         sh '''
-        kubectl apply -f k8s-deployment.yaml
-        kubectl apply -f k8s-service.yaml
+        export KUBECONFIG=/root/.kube/config
+        kubectl apply -f k8s-deployment.yaml --validate=false
+        kubectl apply -f k8s-service.yaml --validate=false
         '''
     }
 }
