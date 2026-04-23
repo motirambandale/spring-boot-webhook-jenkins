@@ -11,8 +11,9 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "spring-boot-webhook-jenkins"
-    }
+    IMAGE_NAME = "spring-boot-webhook-jenkins"
+    VERSION = "1.0.0"
+}
 
     stages {
 
