@@ -11,19 +11,11 @@ pipeline {
     }
 
     stages {
-
-        stage('Clean Workspace') {
-            steps {
-                deleteDir()
-            }
-        }
-
-        stage('Checkout') {
-            steps {
-                git branch: 'master',
-                    url: 'https://github.com/motirambandale/spring-boot-webhook-jenkins.git'
-            }
-        }
+      stage('Checkout') {
+        steps {
+           checkout scm
+          }
+       }
 
         stage('Build') {
             steps {
@@ -36,9 +28,6 @@ pipeline {
                 sh 'mvn test'
             }
         }
-        
-        
-        
 
         stage('SonarQube Analysis') {
             steps {
